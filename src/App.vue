@@ -26,8 +26,8 @@ async function getWeather() {
   <button class="btn">Search</button>
  </form>
  <div v-if="fetchedData" class="weather-main">
-  <h2>{{ weather.name }}</h2>
-  <h1>{{ Math.round(weather.main.temp) }} &#8457</h1>
+  <h1>{{ weather.name }}</h1>
+  <h2>{{ Math.round(weather.main.temp) }} &#8457</h2>
   <div v-for="(w, index) in weather.weather">
     <div key="index">
      <p>{{ w.description }}</p>
@@ -129,9 +129,11 @@ async function getWeather() {
   display: flex;
   list-style-type: none;
   margin: 1.5em 1.2em;
+   font-size: 1.125rem;
  }
 
  .weather-data span {
-  margin: 0.1em 0.5em 0;
+  margin: 0.25em 0.5em 0;
+ 
  }
 </style>
