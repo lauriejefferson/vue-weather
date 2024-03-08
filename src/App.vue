@@ -6,6 +6,9 @@ let result = ref("");
 let city = ref("");
 let state = ref("");
 let country = ref("");
+let lat = ref(null);
+let lon = ref(null);
+let data = ref([])
 let weather = ref({});
 let fetchedData = ref(false);
 
@@ -18,10 +21,15 @@ async function getWeather() {
     country.value = result.value.split(',')[2]
     const geoJSON = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city.value},${state.value},${country.value}&limit=1&appid=${apiKey}`)
     const geoData = await geoJSON.json()
-    console.log(geoData)
-    // const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city.value}&appid=${apiKey}&units=imperial`)
-    // weather.value = await response.json()
-    // console.log(weather)
+    lat.value = geoData[0].lat
+    lon.value = geoData[0].lon
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat.value}&lon=${lon.value}&units=imperial&appid=${apiKey}`)
+    data.value = await response.json()
+    for (const lists of data.value.list) {
+      console.log(Object.entries(lists))
+    }
+    // const date = new Date(weather.value.list[0].dt * 1000)
+    // console.log(date);
   } catch (e) {
     error.value = e
     console.log(error.value)
@@ -75,60 +83,57 @@ const forecast = ref([{ day: 'Tuesday', icon: 'mdi-white-balance-sunny', temp: '
     </div>
   </div> -->
 
-  <v-card class="mx-auto mt-3" max-width="400" v-if="fetchedData" v-for="(w, index) in weather.weather" :key="index">
-    <v-card-item :title="weather.name">
+  <!-- <v-card class="mx-auto mt-3" max-width="400" v-if="fetchedData">
+    <v-card-item :title="weather.city.name">
       <template v-slot:subtitle>
         {{ w.description }}
         <v-img :src="`https://openweathermap.org/img/wn/${w.icon}@2x.png`" :width="100"></v-img>
       </template>
-    </v-card-item>
-    <v-card-text class="py-0">
-      <v-row align="center" no-gutters>
-        <v-col class="text-h2" cols="6">
-          {{ Math.round(weather.main.temp) }}&deg;F
-        </v-col>
-        <!-- <v-col class="text-right" cols="4">
-          <v-img :src="`https://openweathermap.org/img/wn/${w.icon}@2x.png`" :width="100"></v-img>
-        </v-col> -->
-      </v-row>
-    </v-card-text>
+</v-card-item>
+<v-card-text class="py-0">
+  <v-row align="center" no-gutters>
+    <v-col class="text-h2" cols="6">
+      {{ Math.round(weather.main.temp) }}&deg;F
+    </v-col>
+  </v-row>
+</v-card-text>
 
-    <div class=" d-flex py-3 justify-space-between">
-      <v-list-item>
-        <template v-slot:prepend>
+<div class=" d-flex py-3 justify-space-between">
+  <v-list-item>
+    <template v-slot:prepend>
           <v-icon icon="mdi-weather-windy"></v-icon>
         </template>
-        <v-list-item-subtitle>{{ weather.wind.speed }} km/h</v-list-item-subtitle>
-      </v-list-item>
+    <v-list-item-subtitle>{{ weather.wind.speed }} km/h</v-list-item-subtitle>
+  </v-list-item>
 
-      <v-list-item prepend-icon="mdi-weather-pouring">
-        <v-list-item-subtitle>{{ weather.clouds.all }}%</v-list-item-subtitle>
-      </v-list-item>
+  <v-list-item prepend-icon="mdi-weather-pouring">
+    <v-list-item-subtitle>{{ weather.clouds.all }}%</v-list-item-subtitle>
+  </v-list-item>
+</div>
+
+<v-expand-transition>
+  <div v-if="expand">
+    <div class="py-2">
+      <v-slider v-model="time" :max="6" :step="1" :ticks="labels" class="mx-4" color="primary" density="compact"
+        show-ticks="always" thumb-size="10" hide-details></v-slider>
     </div>
 
-    <v-expand-transition>
-      <div v-if="expand">
-        <div class="py-2">
-          <v-slider v-model="time" :max="6" :step="1" :ticks="labels" class="mx-4" color="primary" density="compact"
-            show-ticks="always" thumb-size="10" hide-details></v-slider>
-        </div>
+    <v-list class="bg-transparent">
+      <v-list-item v-for="item in forecast" :key="item.day" :append-icon="item.icon" :subtitle="item.temp"
+        :title="item.day">
+      </v-list-item>
+    </v-list>
+  </div>
+</v-expand-transition>
 
-        <v-list class="bg-transparent">
-          <v-list-item v-for="item in forecast" :key="item.day" :append-icon="item.icon" :subtitle="item.temp"
-            :title="item.day">
-          </v-list-item>
-        </v-list>
-      </div>
-    </v-expand-transition>
+<v-divider></v-divider>
 
-    <v-divider></v-divider>
-
-    <v-card-actions>
-      <v-btn @click="expand = !expand">
-        {{ !expand ? 'Full Report' : 'Hide Report' }}
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+<v-card-actions>
+  <v-btn @click="expand = !expand">
+    {{ !expand ? 'Full Report' : 'Hide Report' }}
+  </v-btn>
+</v-card-actions>
+</v-card> -->
 
 </template>
 
