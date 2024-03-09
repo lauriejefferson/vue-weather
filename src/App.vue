@@ -2,34 +2,29 @@
 import { ref } from 'vue';
 
 const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
-let result = ref("");
-let city = ref("");
-let state = ref("");
-let country = ref("");
-let lat = ref(null);
-let lon = ref(null);
-let data = ref([])
-let weather = ref({});
-let fetchedData = ref(false);
+const cityRef = ref("");
+const result = ref("");
+const weather = ref([{}]);
+const fetchedData = ref(false);
 
 async function getWeather() {
   const error = ref(null)
   fetchedData.value = true;
   try {
-    city.value = result.value.split(',')[0]
-    state.value = result.value.split(',')[1]
-    country.value = result.value.split(',')[2]
-    const geoJSON = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city.value},${state.value},${country.value}&limit=1&appid=${apiKey}`)
+    const city = result.value.split(',')[0]
+    const state = result.value.split(',')[1]
+    const country = result.value.split(',')[2]
+    const geoJSON = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&limit=1&appid=${apiKey}`)
     const geoData = await geoJSON.json()
-    lat.value = geoData[0].lat
-    lon.value = geoData[0].lon
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat.value}&lon=${lon.value}&units=imperial&appid=${apiKey}`)
-    data.value = await response.json()
-    for (const lists of data.value.list) {
-      console.log(Object.entries(lists))
-    }
-    // const date = new Date(weather.value.list[0].dt * 1000)
-    // console.log(date);
+    const lat = geoData[0].lat
+    const lon = geoData[0].lon
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=imperial&appid=${apiKey}`)
+    const data = await response.json()
+    cityRef.value = data.city;
+    weather.value = data.list.filter(item => item.dt_txt.substring(10).indexOf("12:00:00") > -1)
+    console.log(cityRef.value)
+    console.log(weather.value)
+
   } catch (e) {
     error.value = e
     console.log(error.value)
@@ -83,14 +78,14 @@ const forecast = ref([{ day: 'Tuesday', icon: 'mdi-white-balance-sunny', temp: '
     </div>
   </div> -->
 
-  <!-- <v-card class="mx-auto mt-3" max-width="400" v-if="fetchedData">
-    <v-card-item :title="weather.city.name">
-      <template v-slot:subtitle>
+  <v-card class="mx-auto mt-3" max-width="400" v-if="fetchedData">
+    <v-card-item :title="cityRef.name">
+      <!-- <template v-slot:subtitle>
         {{ w.description }}
         <v-img :src="`https://openweathermap.org/img/wn/${w.icon}@2x.png`" :width="100"></v-img>
-      </template>
-</v-card-item>
-<v-card-text class="py-0">
+      </template> -->
+    </v-card-item>
+    <!-- <v-card-text class="py-0">
   <v-row align="center" no-gutters>
     <v-col class="text-h2" cols="6">
       {{ Math.round(weather.main.temp) }}&deg;F
@@ -132,8 +127,8 @@ const forecast = ref([{ day: 'Tuesday', icon: 'mdi-white-balance-sunny', temp: '
   <v-btn @click="expand = !expand">
     {{ !expand ? 'Full Report' : 'Hide Report' }}
   </v-btn>
-</v-card-actions>
-</v-card> -->
+</v-card-actions> -->
+  </v-card>
 
 </template>
 
