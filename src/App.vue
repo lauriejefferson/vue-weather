@@ -14,7 +14,7 @@ async function getWeather() {
     const city = result.value.split(',')[0]
     const state = result.value.split(',')[1]
     const country = result.value.split(',')[2]
-    const geoJSON = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&limit=1&appid=${apiKey}`)
+    const geoJSON = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&limit=1&appid=${apiKey}`)
     const geoData = await geoJSON.json()
     const lat = geoData[0].lat
     const lon = geoData[0].lon
