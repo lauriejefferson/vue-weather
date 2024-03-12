@@ -11,10 +11,8 @@ async function getWeather() {
   const error = ref(null)
   fetchedData.value = true;
   try {
-    const city = result.value.split(',')[0]
-    const state = result.value.split(',')[1]
-    const country = result.value.split(',')[2]
-    const geoJSON = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&limit=1&appid=${apiKey}`)
+    const city = result.value
+    const geoJSON = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`)
     const geoData = await geoJSON.json()
     const lat = geoData[0].lat
     const lon = geoData[0].lon
@@ -38,12 +36,12 @@ const forecast = ref([{ day: 'Tuesday', icon: 'mdi-white-balance-sunny', temp: '
 { day: 'Wednesday', icon: 'mdi-white-balance-sunny', temp: '22\xB0/14\xB0' },
 { day: 'Thursday', icon: 'mdi-cloud', temp: '25\xB0/15\xB0' },]);
 const currentDay = computed(() => weather.value[0]);
-const weekDays = computed(() => weather.value.slice(1, 4))
+const weekDays = computed(() => weather.value.slice(1, 5))
 </script>
 
 <template>
   <form @submit.prevent="getWeather" class="form">
-    <input type="text" placeholder="Enter city, state, country " v-model="result">
+    <input type="text" placeholder="Enter a city " v-model="result">
     <button class="btn">Search</button>
   </form>
 
@@ -62,15 +60,18 @@ const weekDays = computed(() => weather.value.slice(1, 4))
       </v-row>
     </v-card-text>
 
-    <div class=" d-flex py-3 justify-space-between">
+    <div class=" d-flex  justify-space-between mr-2 py-3">
       <v-list-item v-if="currentDay.wind">
         <template v-slot:prepend>
-          <v-icon icon=" mdi-weather-windy"></v-icon>
+          <v-icon icon=" mdi-weather-windy" class="mr-n5"></v-icon>
         </template>
         <v-list-item-subtitle>{{ currentDay.wind.speed }} km/h</v-list-item-subtitle>
       </v-list-item>
 
-      <v-list-item prepend-icon="mdi-weather-pouring" v-if="currentDay.clouds">
+      <v-list-item v-if="currentDay.clouds">
+        <template v-slot:prepend>
+          <v-icon icon="mdi-weather-pouring" class="mr-n5"></v-icon>
+        </template>
         <v-list-item-subtitle>{{ currentDay.clouds.all }}%</v-list-item-subtitle>
       </v-list-item>
     </div>
@@ -117,7 +118,7 @@ const weekDays = computed(() => weather.value.slice(1, 4))
 
 .form input {
   border: 2px solid #5296A5;
-  padding: 10px 30px;
+  padding: 0.6em 1em;
   font-size: 1.125rem;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
@@ -128,8 +129,8 @@ const weekDays = computed(() => weather.value.slice(1, 4))
 }
 
 .btn {
-  width: 150px;
-  padding: 12px 25px;
+  width: 125px;
+  padding: 1em;
   background-color: #5296A5;
   font-weight: 700;
   text-transform: uppercase;
@@ -138,51 +139,6 @@ const weekDays = computed(() => weather.value.slice(1, 4))
   border-bottom-right-radius: 5px;
   color: white;
   border: none;
-  font-size: 1.125rem;
   cursor: pointer;
-}
-
-.weather-main {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 1em 0;
-}
-
-.weather-main h2 {
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.weather-main p {
-  text-align: center;
-  text-transform: capitalize;
-  margin-top: 1em;
-  font-size: 1.125rem;
-}
-
-.weather-data {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.weather-data ul {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-}
-
-.weather-data li {
-  display: flex;
-  list-style-type: none;
-  margin: 1.5em 1.2em;
-  font-size: 1.125rem;
-}
-
-.weather-data span {
-  margin: 0.25em 0.5em 0;
-
 }
 </style>
