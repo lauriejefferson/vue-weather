@@ -2,7 +2,7 @@
 
 Search for the current weather by city. Get a 5-day forecast. Built with Vue 3 and Vuetify.
 
-![Screenshot](./vue-weather.png)
+![Screenshot](./vuetify-weather.png)
 
 ## Project Setup
 
