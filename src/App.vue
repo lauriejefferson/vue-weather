@@ -129,7 +129,7 @@ const weekDays = computed(() => weather.value.slice(1, 5))
 }
 
 .btn {
-  width: 125px;
+  width: 100%;
   padding: 1em;
   background-color: #5296A5;
   font-weight: 700;
