@@ -2,30 +2,40 @@
 import { ref, computed, onMounted } from 'vue';
 import getWeather from '@/composables/getWeather'
 
-const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
-const cityRef = ref("");
 const city = ref("");
-// const weather = ref([{}]);
+const cityRef = ref("");
 const fetchedData = ref(false);
-const { error, load } = getWeather()
-
-const handleSubmit = async () => {
-  const res = await load(city.value)
-  console.log(res)
-}
-
+const forecast = ref([])
+const currentDay = ref({})
 const labels = ref({ 0: 'SU', 1: 'MO', 2: 'TU', 3: 'WED', 4: 'TH', 5: 'FR', 6: 'SA' });
 const expand = ref(false);
 const time = ref(0);
-const forecast = ref([{ day: 'Tuesday', icon: 'mdi-white-balance-sunny', temp: '24\xB0/12\xB0' },
-{ day: 'Wednesday', icon: 'mdi-white-balance-sunny', temp: '22\xB0/14\xB0' },
-{ day: 'Thursday', icon: 'mdi-cloud', temp: '25\xB0/15\xB0' },]);
-// const currentDay = computed(() => weather.value[0]);
-// const weekDays = computed(() => weather.value.slice(0, 4))
 
-// const getWeatherData = () => {
-//   console.log(currentDay.value)
-// };
+const { error, load } = getWeather()
+const daysOfTheWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+const handleSubmit = async () => {
+  fetchedData.value = true
+  const res = await load(city.value)
+  cityRef.value = res.city.name;
+  const weather = computed(() => res.list.filter(item => item.dt_txt.substring(11) === '12:00:00'))
+  console.log(weather.value)
+  forecast.value = computed(() => weather.value.map(
+    (item) => ({
+      day: daysOfTheWeek[new Date(item.dt_txt.substring(0, 10)).getDay()],
+      temp: Math.round(item.main.temp),
+      high: Math.round(item.main.temp_max),
+      low: Math.round(item.main.temp_min),
+      precipitation: item.rain,
+      windspeed: Math.round(item.wind.speed),
+      description: item.weather[0].description,
+      icon: item.weather[0].icon
+    })
+  ))
+  currentDay.value = computed(() => forecast.value.value[0])
+  console.log(currentDay.value.value)
+
+};
 
 
 
@@ -36,60 +46,50 @@ const forecast = ref([{ day: 'Tuesday', icon: 'mdi-white-balance-sunny', temp: '
     <input type="text" placeholder="Enter a city " v-model="city">
     <button class="btn">Search</button>
   </form>
-  <!-- <v-card class="mx-auto mt-3" max-width="400" v-if="fetchedData">
-    <v-card-item :title="cityRef.name" v-for="(item, i) in currentDay.weather" :key="i">
-      <template v-slot:subtitle>
-        {{ item.description }}
-        <v-img :src="`https://openweathermap.org/img/wn/${item.icon}@2x.png`" :width="100"></v-img>
+  <v-card class="mx-auto mt-3" max-width="400" v-if="fetchedData">
+    <v-card-item :title="cityRef">
+      <template v-slot:subtitle v-if="currentDay.value">
+        {{ currentDay.value.description }}
+        <v-img :src="`https://openweathermap.org/img/wn/${currentDay.value.icon}@2x.png`" :width="100"></v-img>
       </template>
-</v-card-item>
-<v-card-text class="py-0">
-  <v-row align="center" no-gutters v-if="currentDay.main">
-    <v-col class="text-h2" cols="6">
-      {{ Math.round(currentDay.main.temp) }}&deg;F
-    </v-col>
-  </v-row>
-</v-card-text>
-
-<div class=" d-flex  justify-space-between mr-2 py-3">
-  <v-list-item v-if="currentDay.wind">
-    <template v-slot:prepend>
-          <v-icon icon=" mdi-weather-windy" class="mr-n5"></v-icon>
-        </template>
-    <v-list-item-subtitle>{{ currentDay.wind.speed }} km/h</v-list-item-subtitle>
-  </v-list-item>
-  <v-list-item v-if="currentDay.clouds">
-    <template v-slot:prepend>
-          <v-icon icon="mdi-weather-pouring" class="mr-n5"></v-icon>
-        </template>
-    <v-list-item-subtitle>{{ currentDay.clouds.all }}%</v-list-item-subtitle>
-  </v-list-item>
-</div>
-<v-expand-transition>
-  <div v-if="expand">
-    <div class="py-2">
-      <v-slider v-model="time" :max="6" :step="1" :ticks="labels" class="mx-4" color="primary" density="compact"
-        show-ticks="always" thumb-size="10" hide-details></v-slider>
-    </div>
-    <v-list class="bg-transparent">
-      <v-list-item v-for="(item, i) in  weekDays" :key="i" append-icon="item.weather.icon" :subtitle="item.main.temp"
-        :title="item.dt_txt.substring(0, 10)">
-        <template v-slot:append>
-              <div v-for="(val, k) in item.weather" :key="k">
-                <v-img :src="`https://openweathermap.org/img/wn/${val.icon}@2x.png`" :width="100"></v-img>
-              </div>
-            </template>
+    </v-card-item>
+    <v-card-text class="py-0">
+      <v-row align="center" no-gutters>
+        <v-col class="text-h2" cols="6">
+          {{ currentDay.value.temp }}&deg;F
+        </v-col>
+      </v-row>
+    </v-card-text>
+    <div class="d-flex py-3 justify-space-between">
+      <v-list-item density="compact" prepend-icon="mdi-weather-windy">
+        <v-list-item-subtitle>{{ currentDay.value.windspeed }} km/h</v-list-item-subtitle>
       </v-list-item>
-    </v-list>
-  </div>
-</v-expand-transition>
-<v-divider></v-divider>
-<v-card-actions>
-  <v-btn @click="expand = !expand">
-    {{ !expand ? 'Full Report' : 'Hide Report' }}
-  </v-btn>
-</v-card-actions>
-</v-card> -->
+
+      <v-list-item density="compact" prepend-icon="mdi-weather-pouring">
+        <v-list-item-subtitle>{{ currentDay.value.precipitation["3h"] }}%</v-list-item-subtitle>
+      </v-list-item>
+    </div>
+    <v-expand-transition>
+      <div v-if="expand">
+        <div class="py-2">
+          <v-slider v-model="time" :max="6" :step="1" :ticks="labels" class="mx-4" color="primary" density="compact"
+            show-ticks="always" thumb-size="10" hide-details></v-slider>
+        </div>
+
+        <v-list class="bg-transparent">
+          <v-list-item v-for="item in forecast" :key="item.day" :append-icon="item.icon" :subtitle="item.temp"
+            :title="item.day">
+          </v-list-item>
+        </v-list>
+      </div>
+    </v-expand-transition>
+
+    <v-divider></v-divider>
+
+    <v-card-actions>
+      <v-btn :text="!expand ? 'Full Report' : 'Hide Report'" @click="expand = !expand"></v-btn>
+    </v-card-actions>
+  </v-card>
 
 </template>
 
