@@ -5,8 +5,8 @@ import getWeather from '@/composables/getWeather'
 const city = ref("");
 const cityRef = ref("");
 const fetchedData = ref(false);
-const forecast = ref([])
-const currentDay = ref({})
+const forecast = ref([]);
+const currentDay = ref([]);
 const labels = ref({ 0: 'SU', 1: 'MO', 2: 'TU', 3: 'WED', 4: 'TH', 5: 'FR', 6: 'SA' });
 const expand = ref(false);
 const time = ref(0);
@@ -53,7 +53,7 @@ const handleSubmit = async () => {
         <v-img :src="`https://openweathermap.org/img/wn/${currentDay.value.icon}@2x.png`" :width="100"></v-img>
       </template>
     </v-card-item>
-    <v-card-text class="py-0">
+    <v-card-text class="py-0" v-if="currentDay.value">
       <v-row align="center" no-gutters>
         <v-col class="text-h2" cols="6">
           {{ currentDay.value.temp }}&deg;F
@@ -61,12 +61,18 @@ const handleSubmit = async () => {
       </v-row>
     </v-card-text>
     <div class="d-flex py-3 justify-space-between">
-      <v-list-item density="compact" prepend-icon="mdi-weather-windy">
-        <v-list-item-subtitle>{{ currentDay.value.windspeed }} km/h</v-list-item-subtitle>
+      <v-list-item density="compact" prepend-icon="mdi-weather-windy" v-if="currentDay.value">
+        <v-list-item-subtitle>{{ currentDay.value.windspeed }} km/h Winds</v-list-item-subtitle>
       </v-list-item>
 
-      <v-list-item density="compact" prepend-icon="mdi-weather-pouring">
-        <v-list-item-subtitle>{{ currentDay.value.precipitation["3h"] }}%</v-list-item-subtitle>
+      <v-list-item density="compact" prepend-icon="mdi-weather-pouring" v-if="currentDay.value">
+        <div v-if="currentDay.value.precipitation">
+          <v-list-item-subtitle>{{ currentDay.value.precipitation }}% Precipitation</v-list-item-subtitle>
+        </div>
+        <div v-else>
+          <v-list-item-subtitle>0% Precipitation</v-list-item-subtitle>
+        </div>
+
       </v-list-item>
     </div>
     <v-expand-transition>
@@ -77,7 +83,7 @@ const handleSubmit = async () => {
         </div>
 
         <v-list class="bg-transparent">
-          <v-list-item v-for="item in forecast" :key="item.day" :append-icon="item.icon" :subtitle="item.temp"
+          <v-list-item v-for="item in forecast.value" :key="item.day" :append-icon="item.icon" :subtitle="item.temp"
             :title="item.day">
           </v-list-item>
         </v-list>
